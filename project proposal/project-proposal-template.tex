@@ -1,0 +1,113 @@
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+
+\newcommand{\assignment}{CS6120 Final Project Proposal}
+
+\newcommand{\duedate}{March 27, 2024}
+
+% Packages (from hw-template.tex)
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+% Page setup
+\geometry{
+    a4paper,
+    margin=1in,
+    top=1in,
+    bottom=1in
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+% Title formatting
+\title{%
+    \vspace*{-2cm}
+    \textbf{Northeastern University, Khoury College of Computer Science} \\
+    \vspace{0.3cm}
+    \textbf{CS 6120 Natural Language Processing} \\
+    \vspace{0.3cm}
+    \textbf{\assignment} \\
+    \vspace{0.3cm}
+    \normalsize{Due: \duedate}
+}
+
+\date{}
+
+\author{
+    \textbf{Amber Fan \& Soonbee Hwang} \\ 
+    \href{mailto:fan.xinyua@northeastern.edu}{fan.xinyua@northeastern.edu} \\
+    \href{mailto:hwang.soon@northeastern.edu}{hwang.soon@northeastern.edu}
+}% INFORMATION
+
+\begin{document}
+
+\maketitle % Print the title
+
+\section{Proposed Objective}
+
+We propose building a Financial Market Intelligence Assistant using Retrieval-Augmented Generation (RAG) that retrieves real financial documents—news, SEC filings, and earnings call transcripts—and uses a local LLM to generate grounded, citation-backed answers, addressing the knowledge cutoff and hallucination limitations of traditional LLMs in financial analysis.
+
+Our system improves factual reliability and provides meaningful support for analysts, students, investors, and financial researchers.
+
+\section{Motivation and Impact}
+
+Financial information changes rapidly. However, Large Language Models (LLMs) face two major limitations:
+
+\begin{itemize}
+    \item Knowledge cutoffs prevent access to the latest events
+    \item Hallucinations cause unreliable or fabricated financial statements
+\end{itemize}
+
+Finance requires high accuracy, up-to-date information, multi-document reasoning, and verifiable claims. Traditional LLMs cannot meet these requirements on their own.
+
+RAG (Retrieval-Augmented Generation) provides a reliable solution by forcing models to reference real documents, reducing hallucinations and increasing transparency. This project demonstrates how RAG architecture can enhance financial analysis and provides meaningful support for analysts, students, investors, and financial researchers.
+
+The \href{https://www.darpa.mil/work-with-us/heilmeier-catechism}{Heilmeier Catechism} framework helps us justify why this problem matters: financial decisions based on inaccurate or outdated information can lead to significant losses, making a reliable, verifiable financial intelligence system crucial for the finance industry.
+
+\section{Background, Relevant Work, and Dataset}
+
+This problem affects financial analysts, students, investors, and researchers who need accurate, up-to-date financial information with verifiable sources. The RAG approach has been successfully applied in various domains to address LLM limitations, including question-answering systems, document analysis, and knowledge-intensive tasks. We adapt this approach specifically for financial market intelligence.
+
+\textbf{Relevant Work:} Recent work in RAG systems (e.g., Lewis et al., 2020; Guu et al., 2020) has shown that retrieval-augmented generation can significantly reduce hallucinations and improve factual accuracy. In the financial domain, similar approaches have been applied to earnings call analysis and financial document understanding, demonstrating the viability of RAG for financial applications.
+
+\textbf{Dataset:} We will aggregate three public datasets, totaling 25k–30k documents:
+
+\begin{itemize}
+    \item \textbf{Yahoo Finance / Finviz News} (~10k–12k articles): Provides real-time financial news and market updates
+    \item \textbf{SEC Filings: 10-K / 10-Q} (~6k filings): Official corporate disclosures with detailed financial information
+    \item \textbf{Earnings Call Transcripts} (~10k transcripts): Management commentary and Q\&A sessions providing insights into company performance
+\end{itemize}
+
+After semantic chunking, we expect 80k–100k meaningful retrieval units, significantly exceeding the ≥10k requirement for the course. These sources provide comprehensive coverage of financial market information, including real-time news, official corporate disclosures, and management commentary, making them appropriate for building a reliable financial intelligence system.
+
+\section{Proposed Approach / Implementation Details}
+
+Our objective is to build a RAG system that retrieves relevant financial documents and generates accurate, citation-backed answers using a local LLM. We optimize for retrieval relevance, answer quality, and system latency. Given the scale of data (80k–100k chunks), we focus on efficient retrieval and processing rather than traditional supervised learning.
+
+\textbf{Pre-processing:} We will normalize text, remove HTML tags, and deduplicate entries across our three data sources. Documents will be split into ~250-token chunks using sentence-level logic to improve semantic integrity and preserve context within each chunk.
+
+\textbf{Class Imbalance:} Since this is a retrieval task rather than classification, we address data distribution through balanced sampling across the three document types (news, filings, transcripts) during indexing to ensure diverse retrieval results and prevent bias toward any single source type.
+
+\textbf{Learning Algorithms:} We use the BGE-Large-en embedding model for semantic vector generation, which provides high-quality embeddings for financial text. For retrieval, we employ FAISS IndexFlatL2 for fast vector similarity search (~20–50ms retrieval time). For generation, we employ a local Mistral 7B GGUF model with llama-cpp-python, avoiding cloud API dependencies and ensuring data privacy.
+
+\textbf{Validation and Evaluation:} We will evaluate based on (1) retrieval relevance and semantic match (measuring whether retrieved chunks are relevant to queries), (2) citation accuracy (verifying that citations point to correct sources), (3) end-to-end latency (target: <1.5 seconds for real-time inference), (4) user interface clarity, and (5) system robustness (handling edge cases and various query types). We will test with example queries like ``Why did NVDA stock fall after earnings?'' and verify that citations point to correct retrieved sources.
+
+\textbf{Technical Implementation:} The RAG pipeline follows these steps: (1) retrieve top-K chunks using FAISS based on query embedding similarity, (2) build an augmented prompt with retrieved context and citation markers, (3) generate LLM answer with citations using the local Mistral model, and (4) display results in a Streamlit interface with expandable citations and latency measurement. We will Dockerize the system and deploy it on a GCP VM for Demo Day access, ensuring real-time inference with citation evidence.
+
+\section{Submission Guidelines}
+
+Upload your PDF file to \href{https://www.gradescope.com/courses/583114}{Gradescope} as a \emph{single} submission with all members of the team. On the top of the document, include the teammates and their LDAP/E-mails. \emph{Try to keep your proposal below three pages.}
+
+\end{document}
+
