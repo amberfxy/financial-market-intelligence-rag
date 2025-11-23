@@ -60,3 +60,23 @@ logs/
 # Kaggle
 kaggle.json
 *.zip
+
+# Documentation (not for GitHub)
+GITHUB_SUBMIT.md
+PUSH_INSTRUCTIONS.md
+DOCUMENTATION_GUIDE.md
+
+# LaTeX source files (submit PDF from Overleaf instead)
+final-report.tex
+include/
+*.tex
+
+# IDE and workspace files
+*.code-workspace
+.vscode/
+.idea/
+
+# Project requirement PDFs (not needed in GitHub)
+project/
+proposal/
+*.pdf
