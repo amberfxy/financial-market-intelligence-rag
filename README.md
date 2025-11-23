@@ -1,8 +1,7 @@
 # Financial Market Intelligence RAG System
 
-### CS6120 Final Project  
-**Team Members:** Soonbee Hwang & Xinyuan Fan (Amber)
-
+**CS6120 Final Project**  
+**Team Members:** Soonbee Hwang & Xinyuan Fan (Amber)  
 **GitHub Repository:** https://github.com/amberfxy/financial-market-intelligence-rag
 
 ---
