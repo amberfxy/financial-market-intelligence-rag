@@ -39,3 +39,53 @@ class FAISSStore:
             k: top K results to return
         """
         if query_embedding.ndim == 1:
+            query_embedding = np.expand_dims(query_embedding, axis=0)
+
+        if query_embedding.dtype != np.float32:
+            query_embedding = query_embedding.astype("float32")
+
+        distances, indices = self.index.search(query_embedding, k)
+
+        results = []
+        for rank, idx in enumerate(indices[0]):
+            if idx < len(self.chunks):
+                results.append({
+                    "rank": rank + 1,
+                    "distance": float(distances[0][rank]),
+                    "chunk": self.chunks[idx],
+                    "metadata": self.chunks[idx].get("metadata", {})
+                })
+
+        return results
+
+    def save(self, index_path: str, chunks_path: str):
+        """
+        Save FAISS index and chunks metadata.
+
+        Args:
+            index_path: path to write FAISS index file
+            chunks_path: path to write chunk metadata
+        """
+        faiss.write_index(self.index, index_path)
+
+        with open(chunks_path, "wb") as f:
+            pickle.dump(self.chunks, f)
+
+    @classmethod
+    def load(cls, index_path: str, chunks_path: str):
+        """
+        Load FAISS index + chunk metadata.
+
+        Returns:
+            FAISSStore instance
+        """
+        index = faiss.read_index(index_path)
+
+        with open(chunks_path, "rb") as f:
+            chunks = pickle.load(f)
+
+        store = cls(index.d)
+        store.index = index
+        store.chunks = chunks
+
+        return store
