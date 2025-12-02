@@ -1,7 +1,7 @@
 """Main RAG pipeline orchestrating retrieval and generation."""
 
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 import logging
 
 import sys
@@ -11,7 +11,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.embeddings.embedder import BGEEmbedder
+from src.embeddings.hybrid_embedder import HybridEmbedder
 from src.vectorstore.faiss_store import FAISSStore
+from src.vectorstore.multi_source_store import MultiSourceFAISSStore
 from src.rag.llm import LocalLLM
 
 logger = logging.getLogger(__name__)
@@ -22,25 +24,35 @@ class RAGPipeline:
     
     def __init__(
         self,
-        embedder: BGEEmbedder,
-        vectorstore: FAISSStore,
+        embedder: Union[BGEEmbedder, HybridEmbedder],
+        vectorstore: Union[FAISSStore, MultiSourceFAISSStore],
         llm: LocalLLM,
-        top_k: int = 5
+        top_k: int = 5,
+        balance_sources: bool = True,
+        use_hybrid_embeddings: bool = False
     ):
         """
         Initialize RAG pipeline.
         
         Args:
-            embedder: BGE embedding model
-            vectorstore: FAISS vector store
+            embedder: BGE or Hybrid embedding model
+            vectorstore: FAISS or MultiSourceFAISS vector store
             llm: Local LLM for generation
             top_k: Number of chunks to retrieve
+            balance_sources: Balance citations across different data sources
+            use_hybrid_embeddings: Use hybrid embedding strategy
         """
         self.embedder = embedder
         self.vectorstore = vectorstore
         self.llm = llm
         self.top_k = top_k
-        logger.info("RAG pipeline initialized")
+        self.balance_sources = balance_sources
+        self.use_hybrid_embeddings = use_hybrid_embeddings
+        
+        logger.info(
+            f"RAG pipeline initialized (balance_sources={balance_sources}, "
+            f"use_hybrid={use_hybrid_embeddings})"
+        )
     
     def query(self, query_text: str, top_k: Optional[int] = None) -> Dict[str, any]:
         """
@@ -59,11 +71,33 @@ class RAGPipeline:
             top_k = self.top_k
         
         # Step 1: Embed query
-        query_embedding = self.embedder.embed_query(query_text)
+        if isinstance(self.embedder, HybridEmbedder):
+            # Hybrid embedder can choose strategy based on query
+            query_embedding_result = self.embedder.embed_text(
+                query_text,
+                content_type="auto",
+                use_w2v=False  # Default to BGE for queries
+            )
+            query_embedding = query_embedding_result["embedding"]
+            embedding_strategy = query_embedding_result.get("strategy", "bge")
+        else:
+            query_embedding = self.embedder.embed_query(query_text)
+            embedding_strategy = "bge"
+        
         embedding_time = time.time() - start_time
         
         # Step 2: Retrieve relevant chunks
-        retrieved_chunks = self.vectorstore.search(query_embedding, k=top_k)
+        if isinstance(self.vectorstore, MultiSourceFAISSStore):
+            # Use balanced retrieval for multi-source store
+            retrieved_chunks = self.vectorstore.search(
+                query_embedding,
+                k=top_k,
+                balance_sources=self.balance_sources
+            )
+        else:
+            # Standard retrieval
+            retrieved_chunks = self.vectorstore.search(query_embedding, k=top_k)
+        
         retrieval_time = time.time() - start_time - embedding_time
         
         if not retrieved_chunks:

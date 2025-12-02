@@ -21,6 +21,9 @@ tiktoken>=0.5.0
 python-dotenv>=1.0.0
 tqdm>=4.65.0
 
+# Word2Vec support
+gensim>=4.3.0
+
 # Kaggle API
 kaggle>=1.5.15
 

@@ -162,6 +162,14 @@ def chunk_dataframe(
             chunk["metadata"]["source_index"] = idx
             chunk["metadata"]["date"] = row.get("Date", "")
             chunk["metadata"]["headline"] = row.get("News Headline", "")[:100]
+            # Add source identification for multi-source support
+            if "source" not in chunk["metadata"]:
+                chunk["metadata"]["source"] = row.get("source", "headlines")
+            if "source_type" not in chunk["metadata"]:
+                chunk["metadata"]["source_type"] = row.get("source_type", "headlines")
+            # Classify content type (headline vs article)
+            text_len = len(chunk["text"])
+            chunk["metadata"]["content_type"] = "headline" if text_len < 200 else "article"
             all_chunks.append(chunk)
     
     logger.info(f"Created {len(all_chunks)} chunks from {len(df)} documents")

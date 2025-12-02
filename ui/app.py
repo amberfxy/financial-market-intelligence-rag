@@ -119,20 +119,35 @@ def main():
         with st.spinner("Processing query..."):
             result = st.session_state.pipeline.query(query, top_k=top_k)
         
-        # Display answer
+        # Display answer with clickable citations
         st.markdown("---")
         st.subheader("📝 Answer")
-        st.write(result["answer"])
         
-        # Display citations
+        # Process answer to make citations clickable
+        answer_text = result["answer"]
+        if result.get("citations"):
+            # Replace citation markers with clickable links
+            for citation in result["citations"]:
+                citation_id = citation['citation_id']
+                # Create clickable citation link using HTML anchor
+                citation_link = f'<a href="#citation-{citation_id}" style="color: #1f77b4; text-decoration: underline; cursor: pointer;">[{citation_id}]</a>'
+                answer_text = answer_text.replace(f"[{citation_id}]", citation_link)
+        
+        st.markdown(answer_text, unsafe_allow_html=True)
+        
+        # Display citations with anchors for clickability
         if result.get("citations"):
             st.markdown("---")
             st.subheader("📚 Citations")
             
             with st.expander(f"View {len(result['citations'])} citation(s)", expanded=False):
                 for citation in result["citations"]:
+                    # Create anchor for this citation
+                    citation_id = citation['citation_id']
+                    st.markdown(f'<div id="citation-{citation_id}"></div>', unsafe_allow_html=True)
+                    
                     with st.container():
-                        st.markdown(f"**[{citation['citation_id']}]**")
+                        st.markdown(f"**[{citation_id}]**")
                         metadata = citation.get("metadata", {})
                         if metadata.get("headline"):
                             st.caption(f"Source: {metadata['headline']}")

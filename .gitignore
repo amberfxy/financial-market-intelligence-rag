@@ -25,10 +25,11 @@ models/*.safetensors
 models/*.pt
 models/*.pth
 
-# Vector stores
+# Vector stores (index files, but keep source code)
 *.faiss
 *.index
-vectorstore/
+/vectorstore/
+!src/vectorstore/
 
 # Environment variables
 .env
