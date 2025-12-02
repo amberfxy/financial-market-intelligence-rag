@@ -101,4 +101,22 @@ class FAISSStore:
             self.chunks = pickle.load(f)
         
         logger.info(f"Loaded FAISS index with {self.index.ntotal} vectors from {index_path}")
-
+    
+    @classmethod
+    def load_class(cls, index_path: str, chunks_path: str):
+        """
+        Load FAISS index + chunk metadata as class method.
+        
+        Returns:
+            FAISSStore instance
+        """
+        index = faiss.read_index(index_path)
+        
+        with open(chunks_path, 'rb') as f:
+            chunks = pickle.load(f)
+        
+        store = cls(index.d)
+        store.index = index
+        store.chunks = chunks
+        
+        return store
