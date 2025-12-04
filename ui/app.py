@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 # Page config
 st.set_page_config(
     page_title="Financial Market Intelligence RAG",
-    page_icon="📈",
     layout="wide"
 )
 
@@ -59,16 +58,16 @@ def load_pipeline():
 
 def main():
     """Main Streamlit app."""
-    st.title("📈 Financial Market Intelligence RAG System")
+    st.title("Financial Market Intelligence RAG System")
     st.markdown("**CS6120 Final Project** | Soonbee Hwang & Xinyuan Fan (Amber)")
     st.markdown("---")
     
     # Sidebar for settings
     with st.sidebar:
-        st.header("⚙️ Settings")
+        st.header("Settings")
         
         # Load pipeline
-        if st.button("🔄 Initialize System", type="primary"):
+        if st.button("Initialize System", type="primary"):
             with st.spinner("Loading models and vector store..."):
                 pipeline = load_pipeline()
                 if pipeline:
@@ -79,7 +78,7 @@ def main():
                     st.error("Failed to initialize system. Check logs.")
         
         if st.session_state.initialized:
-            st.success("✅ System Ready")
+            st.success("System Ready")
             
             # Adjustable parameters
             st.subheader("Retrieval Parameters")
@@ -92,7 +91,7 @@ def main():
     
     # Main content area
     if not st.session_state.initialized or st.session_state.pipeline is None:
-        st.info("👈 Please initialize the system from the sidebar first.")
+        st.info("Please initialize the system from the sidebar first.")
         st.markdown("""
         ### Setup Instructions:
         1. Download the Kaggle dataset to `data/raw/`
@@ -103,7 +102,7 @@ def main():
         return
     
     # Query input
-    st.subheader("💬 Ask a Question")
+    st.subheader("Ask a Question")
     query = st.text_input(
         "Enter your question about financial markets:",
         placeholder="e.g., Why did NVDA stock fall after earnings?",
@@ -112,7 +111,7 @@ def main():
     
     col1, col2 = st.columns([1, 4])
     with col1:
-        submit_button = st.button("🔍 Search", type="primary", use_container_width=True)
+        submit_button = st.button("Search", type="primary", use_container_width=True)
     
     # Process query
     if submit_button and query:
@@ -121,7 +120,7 @@ def main():
         
         # Display answer with clickable citations
         st.markdown("---")
-        st.subheader("📝 Answer")
+        st.subheader("Answer")
         
         # Process answer to make citations clickable
         answer_text = result["answer"]
@@ -138,7 +137,7 @@ def main():
         # Display citations with anchors for clickability
         if result.get("citations"):
             st.markdown("---")
-            st.subheader("📚 Citations")
+            st.subheader("Citations")
             
             with st.expander(f"View {len(result['citations'])} citation(s)", expanded=False):
                 for citation in result["citations"]:
@@ -159,7 +158,7 @@ def main():
         # Display retrieved chunks
         if result.get("retrieved_chunks"):
             st.markdown("---")
-            st.subheader("🔍 Retrieved Evidence")
+            st.subheader("Retrieved Evidence")
             
             with st.expander(f"View {len(result['retrieved_chunks'])} retrieved chunk(s)", expanded=False):
                 for i, chunk_result in enumerate(result["retrieved_chunks"], 1):
@@ -174,7 +173,7 @@ def main():
         # Display latency
         if result.get("latency"):
             st.markdown("---")
-            st.subheader("⏱️ Performance Metrics")
+            st.subheader("Performance Metrics")
             latency = result["latency"]
             col1, col2, col3, col4 = st.columns(4)
             with col1:
@@ -188,9 +187,9 @@ def main():
             
             # Check if latency target is met
             if latency['total'] < 1.5:
-                st.success(f"✅ Latency target met (<1.5s): {latency['total']:.2f}s")
+                st.success(f"Latency target met (<1.5s): {latency['total']:.2f}s")
             else:
-                st.warning(f"⚠️ Latency exceeds target: {latency['total']:.2f}s")
+                st.warning(f"Latency exceeds target: {latency['total']:.2f}s")
 
 
 if __name__ == "__main__":

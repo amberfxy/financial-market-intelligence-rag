@@ -2,15 +2,13 @@
 
 This document describes the enhancements made to address the teacher's feedback about embedding approaches and multi-source citation balancing.
 
-## Overview / 概述
+## Overview
 
-**中文**: 本文档详细说明了根据老师反馈实施的系统改进，包括Word2Vec嵌入支持、混合嵌入方法和多源引用平衡等功能。
-
-**English**: This document describes all enhancements implemented based on teacher feedback, including Word2Vec embedding support, hybrid embedding approach, and multi-source citation balancing.
+This document describes all enhancements implemented based on teacher feedback, including Word2Vec embedding support, hybrid embedding approach, and multi-source citation balancing.
 
 ## Summary of Changes
 
-### 1. Word2Vec Embedding Support ✅
+### 1. Word2Vec Embedding Support
 
 **Implementation**: `src/embeddings/word2vec_embedder.py`
 
@@ -24,7 +22,7 @@ This document describes the enhancements made to address the teacher's feedback 
 - Faster inference for dense information
 - Complements BGE embeddings for different content types
 
-### 2. Hybrid Embedding Approach ✅
+### 2. Hybrid Embedding Approach
 
 **Implementation**: `src/embeddings/hybrid_embedder.py`
 
@@ -39,7 +37,7 @@ This document describes the enhancements made to address the teacher's feedback 
 - Better retrieval quality for mixed content
 - Addresses teacher's suggestion for different strategies for different data types
 
-### 3. Multi-Source Aware Retrieval ✅
+### 3. Multi-Source Aware Retrieval
 
 **Implementation**: `src/vectorstore/multi_source_store.py`
 
@@ -58,7 +56,7 @@ This document describes the enhancements made to address the teacher's feedback 
 - Ensures diverse source representation
 - Addresses teacher's concern about weighting one dataset over another
 
-### 4. Enhanced RAG Pipeline ✅
+### 4. Enhanced RAG Pipeline
 
 **Implementation**: Updated `src/rag/pipeline.py`
 
@@ -71,25 +69,26 @@ This document describes the enhancements made to address the teacher's feedback 
 - `balance_sources`: Enable/disable source balancing
 - `use_hybrid_embeddings`: Enable hybrid embedding strategy
 
-### 5. Enhanced Index Building Script ✅
+### 5. Enhanced Index Building Script
 
-**Implementation**: `scripts/build_index_enhanced.py`
+**Implementation**: `scripts/build_index.py` (enhanced with optional features)
 
-- Supports Word2Vec model training
-- Supports hybrid embedding generation
-- Supports multi-source indexing
+- Supports Word2Vec model training (optional)
+- Supports hybrid embedding generation (optional)
+- Supports multi-source indexing (optional)
 - Command-line options for all features
+- Backward compatible: works without enhanced features
 
 **Usage**:
 ```bash
-# Build with all enhancements (default)
-python scripts/build_index_enhanced.py
+# Build with basic features (default, backward compatible)
+python scripts/build_index.py
 
-# Build with only BGE (backward compatible)
-python scripts/build_index_enhanced.py --no-word2vec --no-hybrid --no-multi-source
+# Build with all enhancements
+python scripts/build_index.py --use-word2vec --use-hybrid --use-multi-source --train-w2v
 
 # Use pre-trained Word2Vec model
-python scripts/build_index_enhanced.py --w2v-model models/word2vec_model.model --no-train-w2v
+python scripts/build_index.py --use-word2vec --use-hybrid --w2v-model models/word2vec_model.model
 ```
 
 ## Migration Guide
@@ -105,7 +104,7 @@ The original `scripts/build_index.py` still works and creates backward-compatibl
 
 2. **Rebuild index with enhancements**:
    ```bash
-   python scripts/build_index_enhanced.py
+   python scripts/build_index.py --use-word2vec --use-hybrid --use-multi-source --train-w2v
    ```
 
 3. **Update application code** to use multi-source store:
@@ -124,7 +123,7 @@ The original `scripts/build_index.py` still works and creates backward-compatibl
 ### Backward Compatibility
 
 - Original `FAISSStore` and `BGEEmbedder` still work
-- Original `build_index.py` script unchanged
+- `build_index.py` script maintains backward compatibility (enhanced features are optional)
 - Existing indexes can be loaded with new code
 - New indexes are backward compatible if multi-source features are disabled
 
@@ -183,11 +182,11 @@ Potential improvements:
 
 ## Implementation Status Summary
 
-### ✅ All Teacher Suggestions Implemented
+### All Teacher Suggestions Implemented
 
-1. ✅ **Word2Vec for headlines/dense information** - Fully implemented
-2. ✅ **Multi-source citation balancing** - Fully implemented  
-3. ✅ **Different strategies for different data types** - Fully implemented
+1. **Word2Vec for headlines/dense information** - Fully implemented
+2. **Multi-source citation balancing** - Fully implemented  
+3. **Different strategies for different data types** - Fully implemented
 
 ### Quick Verification
 

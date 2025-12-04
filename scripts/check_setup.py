@@ -1,124 +1,124 @@
 #!/usr/bin/env python3
-"""检查项目设置是否完整"""
+"""Check if project setup is complete."""
 
 import os
 import sys
 from pathlib import Path
 
 def check_file(path, name):
-    """检查文件是否存在"""
+    """Check if file exists."""
     if os.path.exists(path):
-        print(f"✅ {name}: 存在")
+        print(f"[OK] {name}: exists")
         return True
     else:
-        print(f"❌ {name}: 不存在 ({path})")
+        print(f"[MISSING] {name}: not found ({path})")
         return False
 
 def check_dir(path, name):
-    """检查目录是否存在且有内容"""
+    """Check if directory exists and has content."""
     if os.path.exists(path):
         files = [f for f in os.listdir(path) if not f.startswith('.')]
         if files:
-            print(f"✅ {name}: 存在 ({len(files)} 个文件)")
+            print(f"[OK] {name}: exists ({len(files)} files)")
             return True
         else:
-            print(f"⚠️  {name}: 目录存在但为空 ({path})")
+            print(f"[WARNING] {name}: directory exists but is empty ({path})")
             return False
     else:
-        print(f"❌ {name}: 不存在 ({path})")
+        print(f"[MISSING] {name}: not found ({path})")
         return False
 
 def main():
     print("=" * 60)
-    print("项目设置检查")
+    print("Project Setup Check")
     print("=" * 60)
     
     issues = []
     
-    # 检查核心文件
-    print("\n📁 核心文件:")
-    check_file("ui/app.py", "Streamlit应用")
-    check_file("src/rag/pipeline.py", "RAG管道")
-    check_file("scripts/build_index.py", "索引构建脚本")
-    check_file("requirements.txt", "依赖文件")
+    # Check core files
+    print("\nCore Files:")
+    check_file("ui/app.py", "Streamlit app")
+    check_file("src/rag/pipeline.py", "RAG pipeline")
+    check_file("scripts/build_index.py", "Index building script")
+    check_file("requirements.txt", "Dependencies file")
     
-    # 检查数据
-    print("\n📊 数据:")
-    data_ok = check_dir("data/raw", "原始数据")
+    # Check data
+    print("\nData:")
+    data_ok = check_dir("data/raw", "Raw data")
     if not data_ok:
-        issues.append("需要下载数据集到 data/raw/")
+        issues.append("Download dataset to data/raw/")
     
-    # 检查模型
-    print("\n🤖 模型:")
+    # Check models
+    print("\nModels:")
     model_files = []
     if os.path.exists("models"):
         model_files = [f for f in os.listdir("models") if f.endswith('.gguf')]
     
     if model_files:
-        print(f"✅ 找到 {len(model_files)} 个模型文件")
+        print(f"[OK] Found {len(model_files)} model file(s)")
         for f in model_files:
             size = os.path.getsize(f"models/{f}") / (1024**3)  # GB
             print(f"   - {f} ({size:.2f} GB)")
     else:
-        print("❌ 未找到模型文件 (.gguf)")
-        issues.append("需要下载Mistral 7B模型到 models/")
+        print("[MISSING] No model files found (.gguf)")
+        issues.append("Download Mistral 7B model to models/")
     
-    # 检查索引
-    print("\n🔍 向量索引:")
-    index_ok = check_file("vectorstore/faiss.index", "FAISS索引")
-    chunks_ok = check_file("vectorstore/chunks.pkl", "分块数据")
+    # Check index
+    print("\nVector Index:")
+    index_ok = check_file("vectorstore/faiss.index", "FAISS index")
+    chunks_ok = check_file("vectorstore/chunks.pkl", "Chunks data")
     
     if not (index_ok and chunks_ok):
-        issues.append("需要运行 scripts/build_index.py 构建索引")
+        issues.append("Run scripts/build_index.py to build index")
     
-    # 检查依赖
-    print("\n📦 Python依赖:")
+    # Check dependencies
+    print("\nPython Dependencies:")
     try:
         import streamlit
-        print("✅ streamlit")
+        print("[OK] streamlit")
     except ImportError:
-        print("❌ streamlit - 需要安装")
-        issues.append("运行: pip install -r requirements.txt")
+        print("[MISSING] streamlit - needs installation")
+        issues.append("Run: pip install -r requirements.txt")
     
     try:
         import torch
-        print("✅ torch")
+        print("[OK] torch")
     except ImportError:
-        print("❌ torch - 需要安装")
-        issues.append("运行: pip install -r requirements.txt")
+        print("[MISSING] torch - needs installation")
+        issues.append("Run: pip install -r requirements.txt")
     
     try:
         import transformers
-        print("✅ transformers")
+        print("[OK] transformers")
     except ImportError:
-        print("❌ transformers - 需要安装")
-        issues.append("运行: pip install -r requirements.txt")
+        print("[MISSING] transformers - needs installation")
+        issues.append("Run: pip install -r requirements.txt")
     
     try:
         import faiss
-        print("✅ faiss")
+        print("[OK] faiss")
     except ImportError:
-        print("❌ faiss - 需要安装")
-        issues.append("运行: pip install faiss-cpu")
+        print("[MISSING] faiss - needs installation")
+        issues.append("Run: pip install faiss-cpu")
     
     try:
         import llama_cpp
-        print("✅ llama-cpp-python")
+        print("[OK] llama-cpp-python")
     except ImportError:
-        print("❌ llama-cpp-python - 需要安装")
-        issues.append("运行: pip install llama-cpp-python")
+        print("[MISSING] llama-cpp-python - needs installation")
+        issues.append("Run: pip install llama-cpp-python")
     
-    # 总结
+    # Summary
     print("\n" + "=" * 60)
     if issues:
-        print("⚠️  需要完成的步骤:")
+        print("Steps to complete:")
         for i, issue in enumerate(issues, 1):
             print(f"  {i}. {issue}")
-        print("\n详细步骤请查看 QUICKSTART.md")
+        print("\nSee README.md for detailed instructions")
         return False
     else:
-        print("✅ 所有设置完成！可以运行项目了")
-        print("\n运行命令:")
+        print("All setup complete! Ready to run the project.")
+        print("\nRun command:")
         print("  streamlit run ui/app.py")
         return True
 

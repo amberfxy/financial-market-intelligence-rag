@@ -176,11 +176,11 @@ docker-compose up -d
 
 ### Features
 
-- ✅ Real-time inference with local LLM
-- ✅ Clickable citations to source documents
-- ✅ Adjustable retrieval parameters (Top-K)
-- ✅ Latency measurement and display
-- ✅ Expandable evidence view
+- Real-time inference with local LLM
+- Clickable citations to source documents
+- Adjustable retrieval parameters (Top-K)
+- Latency measurement and display
+- Expandable evidence view
 
 ---
 
@@ -204,12 +204,12 @@ docker-compose up -d
 
 ## 8. Project Requirements Compliance
 
-✅ **Frontend**: Streamlit-based UI  
-✅ **Database**: 50k+ entries (exceeds 10k requirement)  
-✅ **Local LLM**: Mistral 7B GGUF via llama-cpp-python  
-✅ **Citations**: Clickable references to source documents  
-✅ **Dockerization**: Complete Docker setup  
-✅ **Real-time Inference**: Live query processing  
+- **Frontend**: Streamlit-based UI  
+- **Database**: 50k+ entries (exceeds 10k requirement)  
+- **Local LLM**: Mistral 7B GGUF via llama-cpp-python  
+- **Citations**: Clickable references to source documents  
+- **Dockerization**: Complete Docker setup  
+- **Real-time Inference**: Live query processing  
 
 ---
 
