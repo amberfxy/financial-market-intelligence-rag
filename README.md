@@ -134,25 +134,26 @@ wget "https://drive.google.com/uc?export=download&id=1rYRlpdRHe48sCEwOfSfl39umRV
 wget "https://drive.google.com/uc?export=download&id=14U3eY6iN8_-NQmX_nw0hNH__I8ErQE8d" -O vectorstore/faiss.index
 ```
 
-6. **Run the Streamlit app:**
+---
+
+## 5. Run Application
+
+**Option 1: Run the Streamlit app:**
 ```bash
 streamlit run ui/app.py
 ```
 
 The app will be available at `http://localhost:8501`
 
----
 
-## 5. Docker Deployment
+**Option 2: Docker Deployment**
 
-### Build and Run with Docker
-
-1. **Build the Docker image:**
+1. Build the Docker image:
 ```bash
 docker build -t financial-rag-system .
 ```
 
-2. **Run with docker compose:**
+2. Run with docker compose:
 ```bash
 docker compose up -d
 ```
