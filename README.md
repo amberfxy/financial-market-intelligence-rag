@@ -120,7 +120,18 @@ wget https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF/resolve/main/
 
 5. **Build the FAISS index:**
 ```bash
+cd ..
+```
+
+**Option 1: Build index locally**
+```bash
 python scripts/build_index.py
+```
+
+**Option 2: Download pre-generated index files**
+```bash
+wget "https://drive.google.com/uc?export=download&id=1rYRlpdRHe48sCEwOfSfl39umRVpq0oq7" -O vectorstore/chunks.pkl &&
+wget "https://drive.google.com/uc?export=download&id=14U3eY6iN8_-NQmX_nw0hNH__I8ErQE8d" -O vectorstore/faiss.index
 ```
 
 6. **Run the Streamlit app:**
