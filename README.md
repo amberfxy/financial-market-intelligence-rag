@@ -48,7 +48,7 @@ The goal is to provide accurate, up-to-date financial reasoning without hallucin
 - **src/rag/**: RAG pipeline and local LLM inference
 - **ui/**: Streamlit UI for querying the system  
 - **scripts/**: Utility scripts for data processing
-- **docker/**: Dockerfile + docker-compose for deployment  
+- **docker/**: Dockerfile + docker compose for deployment
 - **models/**: Instructions for downloading local LLM models  
 
 ---
@@ -141,9 +141,9 @@ The app will be available at `http://localhost:8501`
 docker build -t financial-rag-system .
 ```
 
-2. **Run with docker-compose:**
+2. **Run with docker compose:**
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 3. **Access the app:**
