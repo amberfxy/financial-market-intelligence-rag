@@ -162,13 +162,6 @@ docker compose up -d
    - Local: http://localhost:8501
    - GCP VM: http://<VM_IP>:8501
 
-### Docker Features
-
-- Automatic dependency installation
-- Health checks
-- Volume mounts for data and models
-- Port mapping for external access
-
 ---
 
 ## 6. Usage
