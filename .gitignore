@@ -72,6 +72,28 @@ final-report.tex
 include/
 *.tex
 
+# Temporary documentation and communication files
+*_STATUS.md
+*_RESULTS.md
+*_PROGRESS.md
+*_COMPLETE.md
+*_FIXED.md
+*_APPLIED.md
+*_TEST*.md
+*_COMPARISON.md
+MESSAGE_TO_*.md
+TEAMMATE_*.md
+*_SETUP.md
+*_START.md
+*_TROUBLESHOOTING.md
+*_EXPLANATION.md
+PRESENTATION_*.md
+REPORT_*.md
+QUICK_*.md
+HOW_TO_*.md
+START_*.sh
+docker_*.log
+
 # IDE and workspace files
 *.code-workspace
 .vscode/
