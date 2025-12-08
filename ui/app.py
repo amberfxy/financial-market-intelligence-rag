@@ -41,9 +41,14 @@ def load_pipeline():
         
         # Try to load LLM (may fail if model not downloaded)
         try:
-            llm = LocalLLM()
-        except FileNotFoundError:
-            st.warning("LLM model not found. Please download the model first.")
+            # Use absolute path to model file
+            model_path = Path(__file__).parent.parent / "models" / "mistral-7b-instruct-v0.1.Q4_K_M.gguf"
+            llm = LocalLLM(model_path=str(model_path))
+        except FileNotFoundError as e:
+            st.warning(f"LLM model not found. Please download the model first. Error: {str(e)}")
+            llm = None
+        except Exception as e:
+            st.warning(f"Error loading LLM: {str(e)}")
             llm = None
         
         if llm:
