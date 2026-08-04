@@ -17,10 +17,24 @@ def test_imports():
     try:
         from src.data.loader import load_kaggle_dataset, preprocess_data
         from src.chunking.chunker import chunk_text
-        from src.embeddings.embedder import BGEEmbedder
+        from src.embeddings.factory import create_bge_embedder
+        from src.embeddings.onnx_embedder import ONNXBGEEmbedder, onnx_model_available
         from src.vectorstore.faiss_store import FAISSStore
         from src.rag.llm import LocalLLM
         from src.rag.pipeline import RAGPipeline
+        # BGEEmbedder (PyTorch) is intentionally not imported here — it pulls
+        # torch/sentence-transformers; covered via create_bge_embedder fallback.
+        _ = (
+            load_kaggle_dataset,
+            preprocess_data,
+            chunk_text,
+            create_bge_embedder,
+            ONNXBGEEmbedder,
+            onnx_model_available,
+            FAISSStore,
+            LocalLLM,
+            RAGPipeline,
+        )
         logger.info("All imports successful")
         return True
     except Exception as e:
@@ -29,18 +43,67 @@ def test_imports():
 
 
 def test_embedder():
-    """Test embedding generation."""
-    logger.info("Testing embedder...")
+    """Test embedding via create_bge_embedder (ONNX preferred, PyTorch fallback)."""
+    logger.info("Testing embedder (factory)...")
     try:
-        embedder = BGEEmbedder()
+        from src.embeddings.factory import create_bge_embedder
+
+        embedder = create_bge_embedder(prefer_onnx=True)
+        backend = type(embedder).__name__
+        logger.info(f"Factory selected backend: {backend}")
+
         test_text = "This is a test sentence."
         embedding = embedder.embed_texts([test_text])
         assert embedding.shape[0] == 1
         assert embedding.shape[1] == 1024  # BGE-Large-en dimension
-        logger.info("Embedder test passed")
+
+        query = embedder.embed_query("Why did NVDA stock fall after earnings?")
+        assert query.shape == (1024,)
+        logger.info(f"Embedder test passed ({backend})")
         return True
     except Exception as e:
         logger.error(f"Embedder test failed: {e}")
+        return False
+
+
+def test_onnx_embedder():
+    """Test ONNX Runtime BGE backend specifically."""
+    logger.info("Testing ONNX embedder...")
+    try:
+        from src.embeddings.factory import create_bge_embedder
+        from src.embeddings.onnx_embedder import ONNXBGEEmbedder, onnx_model_available
+        import numpy as np
+
+        if not onnx_model_available():
+            logger.warning(
+                "ONNX BGE model not found — skipping. "
+                "Run: python scripts/export_bge_onnx.py --verify"
+            )
+            return True  # skip, not fail
+
+        embedder = create_bge_embedder(prefer_onnx=True)
+        assert isinstance(embedder, ONNXBGEEmbedder), (
+            f"Expected ONNXBGEEmbedder, got {type(embedder).__name__}"
+        )
+
+        texts = [
+            "Federal Reserve raises interest rates.",
+            "Tech stocks fell after earnings reports.",
+        ]
+        embeddings = embedder.embed_texts(texts)
+        assert embeddings.shape == (2, 1024)
+
+        norms = np.linalg.norm(embeddings, axis=1)
+        assert np.allclose(norms, 1.0, atol=1e-4), f"Expected L2-normalized vectors, got {norms}"
+
+        query = embedder.embed_query("market interest rates")
+        assert query.shape == (1024,)
+        assert abs(float(np.linalg.norm(query)) - 1.0) < 1e-4
+
+        logger.info("ONNX embedder test passed")
+        return True
+    except Exception as e:
+        logger.error(f"ONNX embedder test failed: {e}")
         return False
 
 
@@ -91,6 +154,7 @@ def main():
         ("Imports", test_imports),
         ("Chunker", test_chunker),
         ("Embedder", test_embedder),
+        ("ONNX Embedder", test_onnx_embedder),
         ("Vector Store", test_vectorstore),
     ]
     
@@ -120,4 +184,3 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
-

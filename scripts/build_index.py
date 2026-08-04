@@ -16,7 +16,7 @@ import argparse
 
 from src.data.loader import load_kaggle_dataset, preprocess_data
 from src.chunking.chunker import chunk_dataframe
-from src.embeddings.embedder import BGEEmbedder
+from src.embeddings.factory import create_bge_embedder
 from src.vectorstore.faiss_store import FAISSStore
 
 # Optional imports for enhanced features
@@ -42,7 +42,8 @@ def build_index(
     use_multi_source: bool = False,
     w2v_model_path: Optional[str] = None,
     train_w2v: bool = False,
-    w2v_epochs: int = 10
+    w2v_epochs: int = 10,
+    prefer_onnx: bool = True,
 ):
     """
     Build FAISS index from dataset.
@@ -58,6 +59,7 @@ def build_index(
         w2v_model_path: Path to pre-trained Word2Vec model (optional)
         train_w2v: Train Word2Vec model on dataset
         w2v_epochs: Number of epochs for Word2Vec training
+        prefer_onnx: Prefer ONNX Runtime BGE when an export is available
     """
     # Check if enhanced features are requested but not available
     if (use_word2vec or use_hybrid or use_multi_source) and not ENHANCED_FEATURES_AVAILABLE:
@@ -122,9 +124,12 @@ def build_index(
             logger.info(f"Word2Vec model saved to {w2v_output_path}")
     
     # Step 4: Generate embeddings
+    bge_embedder = create_bge_embedder(prefer_onnx=prefer_onnx)
+    logger.info(f"BGE backend: {type(bge_embedder).__name__}")
+
     if use_hybrid and w2v_embedder and ENHANCED_FEATURES_AVAILABLE:
         logger.info("Using hybrid embedding approach (BGE + Word2Vec)...")
-        embedder = HybridEmbedder(w2v_embedder=w2v_embedder)
+        embedder = HybridEmbedder(bge_embedder=bge_embedder, w2v_embedder=w2v_embedder)
         content_types = [chunk.get("metadata", {}).get("content_type", "auto") for chunk in chunks]
         embedding_result = embedder.embed_texts(chunk_texts, content_types=content_types)
         embeddings = embedding_result["embeddings"]
@@ -132,8 +137,7 @@ def build_index(
         logger.info(f"Embedding strategies used: {set(strategies)}")
     else:
         logger.info("Using BGE embedding approach...")
-        embedder = BGEEmbedder()
-        embeddings = embedder.embed_texts(chunk_texts, batch_size=32)
+        embeddings = bge_embedder.embed_texts(chunk_texts, batch_size=32)
     
     logger.info(f"Generated embeddings: shape {embeddings.shape}")
     
@@ -178,6 +182,12 @@ if __name__ == "__main__":
     parser.add_argument("--w2v-model", type=str, help="Path to pre-trained Word2Vec model")
     parser.add_argument("--train-w2v", action="store_true", help="Train Word2Vec model on dataset")
     parser.add_argument("--w2v-epochs", type=int, default=10, help="Number of Word2Vec training epochs")
+    parser.add_argument(
+        "--prefer-onnx",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Prefer ONNX Runtime BGE when exported model exists (default: true)",
+    )
     
     args = parser.parse_args()
     
@@ -191,6 +201,7 @@ if __name__ == "__main__":
         use_multi_source=args.use_multi_source,
         w2v_model_path=args.w2v_model,
         train_w2v=args.train_w2v,
-        w2v_epochs=args.w2v_epochs
+        w2v_epochs=args.w2v_epochs,
+        prefer_onnx=args.prefer_onnx,
     )
 

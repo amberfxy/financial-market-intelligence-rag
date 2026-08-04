@@ -6,6 +6,9 @@ faiss-cpu>=1.7.4
 numpy>=1.24.0
 pandas>=2.0.0
 
+# Embedding inference (ONNX Runtime preferred for BGE)
+onnxruntime>=1.16.0
+
 # LLM inference
 llama-cpp-python>=0.1.78
 
@@ -27,4 +30,3 @@ gensim>=4.3.0
 
 # Kaggle API
 kaggle>=1.5.15
-

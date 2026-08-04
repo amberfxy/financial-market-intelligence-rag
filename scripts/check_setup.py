@@ -107,6 +107,23 @@ def main():
     except ImportError:
         print("[MISSING] llama-cpp-python - needs installation")
         issues.append("Run: pip install llama-cpp-python")
+
+    try:
+        import onnxruntime
+        print(f"[OK] onnxruntime ({onnxruntime.__version__})")
+    except ImportError:
+        print("[MISSING] onnxruntime - needs installation")
+        issues.append("Run: pip install onnxruntime")
+
+    # Optional ONNX BGE export
+    print("\nONNX BGE Export (optional, recommended):")
+    onnx_dir = Path("models/bge-large-en-v1.5-onnx")
+    if (onnx_dir / "model.onnx").is_file():
+        size_mb = (onnx_dir / "model.onnx").stat().st_size / (1024 ** 2)
+        print(f"[OK] ONNX BGE model ({size_mb:.1f} MB)")
+    else:
+        print("[WARNING] ONNX BGE not exported — will fall back to PyTorch")
+        print("   Run: python scripts/export_bge_onnx.py --verify")
     
     # Summary
     print("\n" + "=" * 60)

@@ -1,7 +1,7 @@
 """Main RAG pipeline orchestrating retrieval and generation."""
 
 import time
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, TYPE_CHECKING, Any
 import logging
 
 import sys
@@ -10,11 +10,14 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.embeddings.embedder import BGEEmbedder
-from src.embeddings.hybrid_embedder import HybridEmbedder
+from src.embeddings.onnx_embedder import ONNXBGEEmbedder
 from src.vectorstore.faiss_store import FAISSStore
 from src.vectorstore.multi_source_store import MultiSourceFAISSStore
 from src.rag.llm import LocalLLM
+
+if TYPE_CHECKING:
+    from src.embeddings.embedder import BGEEmbedder
+    from src.embeddings.hybrid_embedder import HybridEmbedder
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +27,7 @@ class RAGPipeline:
     
     def __init__(
         self,
-        embedder: Union[BGEEmbedder, HybridEmbedder],
+        embedder: Union["BGEEmbedder", ONNXBGEEmbedder, "HybridEmbedder", Any],
         vectorstore: Union[FAISSStore, MultiSourceFAISSStore],
         llm: LocalLLM,
         top_k: int = 5,
@@ -35,7 +38,7 @@ class RAGPipeline:
         Initialize RAG pipeline.
         
         Args:
-            embedder: BGE or Hybrid embedding model
+            embedder: BGE (PyTorch/ONNX) or Hybrid embedding model
             vectorstore: FAISS or MultiSourceFAISS vector store
             llm: Local LLM for generation
             top_k: Number of chunks to retrieve
@@ -65,6 +68,8 @@ class RAGPipeline:
         Returns:
             Dictionary with answer, citations, and metadata
         """
+        from src.embeddings.hybrid_embedder import HybridEmbedder
+
         start_time = time.time()
         
         if top_k is None:

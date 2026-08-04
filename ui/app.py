@@ -8,7 +8,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.embeddings.embedder import BGEEmbedder
+from src.embeddings.factory import create_bge_embedder
+from src.embeddings.onnx_embedder import ONNXBGEEmbedder, onnx_model_available
 from src.vectorstore.faiss_store import FAISSStore
 from src.rag.llm import LocalLLM
 from src.rag.pipeline import RAGPipeline
@@ -34,8 +35,18 @@ if 'pipeline' not in st.session_state:
 def load_pipeline():
     """Load RAG pipeline components (cached)."""
     try:
-        # Load components
-        embedder = BGEEmbedder()
+        # Prefer ONNX Runtime BGE when exported model is available
+        embedder = create_bge_embedder(prefer_onnx=True)
+        if isinstance(embedder, ONNXBGEEmbedder):
+            logger.info("UI pipeline using ONNX Runtime BGE embedder")
+        elif onnx_model_available():
+            logger.warning("ONNX model present but failed to load; using PyTorch BGE")
+        else:
+            logger.info(
+                "ONNX BGE not found; using PyTorch BGE. "
+                "Run: python scripts/export_bge_onnx.py"
+            )
+
         vectorstore = FAISSStore()
         vectorstore.load()
         

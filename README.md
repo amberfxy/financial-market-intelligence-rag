@@ -111,13 +111,15 @@ pip install -r requirements.txt
 
 3. **Download the dataset** (see Dataset section above)
 
-4. **Download the LLM model:**
+4. **Download / export models:**
 ```bash
 cd models
 # See models/README.md for download instructions
 wget https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF/resolve/main/mistral-7b-instruct-v0.1.Q4_K_M.gguf
+cd ..
+# Optional but recommended: download official BGE ONNX for faster query embedding
+python scripts/export_bge_onnx.py --verify
 ```
-
 5. **Build the FAISS index:**
 ```bash
 cd ..
@@ -193,11 +195,11 @@ docker compose up -d
 
 ### Components
 
-- **Embedding Model**: BGE-Large-en-v1.5 (1024 dimensions)
+- **Embedding Model**: BGE-Large-en-v1.5 (1024 dimensions), ONNX Runtime preferred with PyTorch fallback
 - **Vector Store**: FAISS IndexFlatL2 (exact L2 distance)
 - **LLM**: Mistral 7B Instruct GGUF (local inference)
 - **Chunking**: Sentence-level semantic chunking (~250 tokens)
-- **Retrieval**: Top-K similarity search with cosine similarity
+- **Retrieval**: Top-K via FAISS IndexFlatL2 (L2 distance; with L2-normalized embeddings this ranks equivalently to cosine similarity)
 
 ### Performance Targets
 

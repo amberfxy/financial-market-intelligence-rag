@@ -35,8 +35,30 @@ After downloading, update the model path in:
 
 ### Embedding Model
 
-The **BGE-Large-en** model will be automatically downloaded on first use via `sentence-transformers`.
+The **BGE-Large-en** model is used for retrieval embeddings.
+
+**Preferred (ONNX Runtime):** download the official ONNX export once:
+
+```bash
+pip install onnxruntime
+python scripts/export_bge_onnx.py --verify
+```
+
+This writes `models/bge-large-en-v1.5-onnx/` (`model.onnx` + tokenizer) from
+`BAAI/bge-large-en-v1.5` (`onnx/model.onnx`).  
+The UI and `build_index.py` auto-prefer this path when present.
+
+Optional: rebuild ONNX from local PyTorch weights:
+
+```bash
+python scripts/export_bge_onnx.py --from-torch --verify-torch
+```
+
+**Fallback (PyTorch):** if the ONNX files are missing, the system uses
+`sentence-transformers` with `BAAI/bge-large-en-v1.5` (~1.3 GB, cached under
+`~/.cache/huggingface/`).
+
 - Model: `BAAI/bge-large-en-v1.5`
-- Size: ~1.3 GB
-- Will be cached in `~/.cache/huggingface/`
+- Dimension: 1024
+- Pooling: CLS + L2 normalize (same for ONNX and PyTorch)
 

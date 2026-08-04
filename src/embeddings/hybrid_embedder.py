@@ -1,10 +1,9 @@
 """Hybrid embedding approach combining BGE and Word2Vec for different content types."""
 
 import numpy as np
-from typing import List, Union, Dict, Optional
+from typing import List, Dict, Optional, Any
 import logging
 
-from src.embeddings.embedder import BGEEmbedder
 from src.embeddings.word2vec_embedder import Word2VecEmbedder
 
 logger = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ class HybridEmbedder:
     
     def __init__(
         self,
-        bge_embedder: Optional[BGEEmbedder] = None,
+        bge_embedder: Optional[Any] = None,
         w2v_embedder: Optional[Word2VecEmbedder] = None,
         use_bge_for_long: bool = True,
         long_text_threshold: int = 100  # Characters
@@ -28,12 +27,15 @@ class HybridEmbedder:
         Initialize hybrid embedder.
         
         Args:
-            bge_embedder: BGE embedder instance
+            bge_embedder: BGE embedder instance (PyTorch or ONNX)
             w2v_embedder: Word2Vec embedder instance
             use_bge_for_long: Use BGE for longer texts
             long_text_threshold: Character threshold for using BGE vs Word2Vec
         """
-        self.bge_embedder = bge_embedder or BGEEmbedder()
+        if bge_embedder is None:
+            from src.embeddings.factory import create_bge_embedder
+            bge_embedder = create_bge_embedder(prefer_onnx=True)
+        self.bge_embedder = bge_embedder
         self.w2v_embedder = w2v_embedder
         self.use_bge_for_long = use_bge_for_long
         self.long_text_threshold = long_text_threshold
