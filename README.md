@@ -182,11 +182,11 @@ Performance targets: retrieval &lt;50ms · end-to-end &lt;1.5s · citations chec
 
 ---
 
-## Troubleshooting
+## Setup notes
 
-**Model not found** — download Mistral into `models/`; check path in `src/rag/llm.py`.  
-**Index not found** — run `python scripts/build_index.py` or download pre-built files.  
-**CUDA / GPU** — CPU works by default with llama-cpp-python; use CUDA builds for GPU (see Dockerfile).
+- **LLM weights** are not stored in git (~4GB). Download the GGUF file into `models/` (see `models/README.md`); the default path is configured in `src/rag/llm.py`.
+- **FAISS index** is also omitted from git. Build with `python scripts/build_index.py`, or download the pre-built artifacts listed in the Setup section above.
+- **Hardware**: runs on CPU by default via `llama-cpp-python`. Optional CUDA-enabled builds are documented in the `Dockerfile`.
 
 ---
 
